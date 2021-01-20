@@ -4,6 +4,8 @@ import streamlit as st
 import numpy as np 
 import pandas as pd
 from sklearn import datasets
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 # import matplotlib.pyplot as plt
 import time
 from datetime import time, datetime
@@ -11,13 +13,10 @@ from datetime import time, datetime
 
 st.title('Streamlit project to visualize classification methods on different datasets')
 
-color = st.color_picker('Pick A Color', '#00f900')
-st.write('The current color is', color)
-
-st.write("""
-	# Instructions: 
-	Choose one of the datasets from the left menu.
-	""")
+# st.write("""
+# 	# Instructions: 
+# 	Choose one of the datasets and one classifier from the left menu.
+# 	""")
 
 
 # BLOCK TO SELECT AND VISUALIZE INFO ABOUT DATASETs
@@ -46,30 +45,38 @@ X = data.data
 Y = data.target
 
 
-# BLOCK TO SELECT CLASSIFIER
 
-classifier_list = ['KNN', 'LDA', 'SVM', 'Random Forest']
+# BLOCK TO SELECT CLASSIFIER
+classifier_list = ['KNN', 'SVM', 'Random Forest']
+classifier_method = ['KNeighborsClassifier']
 # Pick classifier from dropdown menu
-classifier_name = st.sidebar.selectbox('Select classifier', ('KNN', 'SVM', 'Random Forest'))
+classifier_name = st.sidebar.selectbox('Select classifier', classifier_list)
+
+st.sidebar.write('Choose parameters for ',classifier_name, ' classifier')
 
 def get_classifier(classifier_name):
-	pass
+	if classifier_name == 'KNN':
+		K = st.sidebar.slider('K', 1,20,5)
+		weights = st.sidebar.radio('Weights', options = ['uniform', 'distance'])
+		clf = KNeighborsClassifier(K, weights = weights)
+	elif classifier_name == 'SVM':
+		C = st.sidebar.select_slider('C',options = [1,10,100,1000])
+		kernel = st.sidebar.select_slider('kernel',options = ['linear', 'poly', 'rbf'])
+		gamma = st.sidebar.select_slider('gamma',options = [10**(-1),10**(-2),10**(-3),10**(-4)]) 
+		clf = SVC(C = C, kernel = kernel)
 
+	return clf
 
-
-
-
-
+clf = get_classifier(classifier_name)
+st.write('')
+st.write('### Selected Classifier: ', classifier_name)
+st.write('Optional parameters:' )
+	
 
 
 
 st.write(classifier_name)
 
-map_data = pd.DataFrame(
-    np.random.randn(1000, 2) / [50, 50] + [41.64, -0.88],
-    columns=['lat', 'lon'])
-
-st.map(map_data)
 
 
 
